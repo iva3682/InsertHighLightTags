@@ -1,0 +1,19 @@
+﻿{
+	"description": "The InsertHighLightTags",
+	"license": "MIT",
+	"name": "iva3682/InsertHighLightTags",
+	"type": "project",
+	"authors": [
+		{
+			"name": "iva3682",
+			"email": "iva3682@yandex.ru"
+		}
+	],
+	"autoload": {
+		"psr-4": {
+			"iva3682\\InsertHighLightTags\\": "iva3682/src/"
+		}
+	},
+	"require": {
+	}
+}
