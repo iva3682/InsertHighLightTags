@@ -1,7 +1,7 @@
 {
 	"description": "The InsertHighLightTags",
 	"license": "MIT",
-	"name": "iva3682/InsertHighLightTags",
+	"name": "iva3682/inserthighlighttags",
 	"type": "project",
 	"authors": [
 		{
@@ -15,5 +15,6 @@
 		}
 	},
 	"require": {
-	}
+	},
+	"minimum-stability": "dev"
 }
