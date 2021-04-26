@@ -11,7 +11,7 @@
 	],
 	"autoload": {
 		"psr-4": {
-			"iva3682\\InsertHighLightTags\\": "iva3682/src/"
+			"iva3682\\InsertHighLightTags\\": "src"
 		}
 	},
 	"require": {
