@@ -39,9 +39,6 @@ class InsertHighLightTags
     }
 
     public function build(string $source) {
-        /** @var ApplyTagPosition[] $applyTagPosition */
-        $applyTagPosition = [];
-
         usort($this->tagPositions, function (TagPosition $a, TagPosition $b) {
             if ($a->getStart() == $b->getStart()) {
                 if ($a->getLength() == $b->getLength()) {
@@ -54,25 +51,25 @@ class InsertHighLightTags
             return ($a->getStart() < $b->getStart()) ? -1 : 1;
         });
 
-        foreach($this->tagPositions as $tagPosition) {
+        foreach($this->tagPositions as $idx => $tagPosition) {
             $start = $tagPosition->getStart();
-
-            foreach($applyTagPosition as $applyTag) {
-                if($applyTag->getStart() <= $start) {
-                    $start += $applyTag->getTag()->getLengthOpen();
-                }
-
-                if($applyTag->getEnd() < $start) {
-                    $start += $applyTag->getTag()->getLengthClose();
-                }
-            }
 
             $end = $start + $tagPosition->getLength() + $tagPosition->getTag()->getLengthOpen();
 
             $source = $this->mb_substr_replace($source, $tagPosition->getTag()->getOpen(), $start, 0);
             $source = $this->mb_substr_replace($source, $tagPosition->getTag()->getClose(), $end, 0);
 
-            $applyTagPosition[] = new ApplyTagPosition($tagPosition->getTag(), $start, $end);
+            for($i = $idx + 1; $i < count($this->tagPositions); $i++) {
+                $applyTagPosition = $this->tagPositions[$i];
+
+                if($start <= $applyTagPosition->getStart()) {
+                    if($applyTagPosition->getEnd() != $tagPosition->getEnd()) {
+                        $applyTagPosition->setStart($applyTagPosition->getStart() + $tagPosition->getTag()->getLengthClose());
+                    }
+
+                    $applyTagPosition->setStart($applyTagPosition->getStart() + $tagPosition->getTag()->getLengthOpen());
+                }
+            }
         }
 
         return $source;
@@ -92,11 +89,12 @@ class InsertHighLightTags
                 $model = str_pad($model, $restoreItem->getPosition() + $restoreItem->getLength());
             }
 
-            $model = $this->mb_substr_replace($model, $restoreItem->getStringFill(), $restoreItem->getPosition(), 0);
+            $offRestore = ($restoreItem->getWrapCharLeft() == ' ' or $restoreItem->getWrapCharRight() == ' ') ? 0 : 1;
+            $model = $this->mb_substr_replace($model, $restoreItem->getStringFill(), $restoreItem->getPosition(), $offRestore);
 
             foreach($this->tagPositions as $tagPositions) {
                 if($tagPositions->getStart() >= $restoreItem->getPosition() and !$tagPositions->getIsAbsolute()) {
-                    $tagPositions->setStart($tagPositions->getStart() + mb_strlen($restoreItem->getStringFill()));
+                    $tagPositions->setStart($tagPositions->getStart() + $restoreItem->getLength() - $offRestore);
                 }
             }
 
