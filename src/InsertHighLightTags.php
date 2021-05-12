@@ -63,7 +63,7 @@ class InsertHighLightTags
                 $applyTagPosition = $this->tagPositions[$i];
 
                 if($start <= $applyTagPosition->getStart()) {
-                    if($applyTagPosition->getEnd() != $tagPosition->getEnd()) {
+                    if($applyTagPosition->getEnd() > $tagPosition->getEnd()) {
                         $applyTagPosition->setStart($applyTagPosition->getStart() + $tagPosition->getTag()->getLengthClose());
                     }
 
