@@ -95,41 +95,8 @@ class InsertHighLightTags
             if($prevRestoreItem and $prevRestoreItem->getPosition() + $prevRestoreItem->getLength() > $restoreItem->getPosition()) {
                 $offSlice = $restoreItem->getPosition() - ($prevRestoreItem->getPosition() + $prevRestoreItem->getLength());
             }
-            else {
-                $offRestore = ($restoreItem->getWrapCharLeft() == ' ' or $restoreItem->getWrapCharRight() == ' ') ? 0 : 1;
-            }
 
             $model = $this->mb_substr_replace($model, $restoreItem->getStringFill(), $restoreItem->getPosition(), $offRestore - $offSlice);
-
-            foreach($this->tagPositions as $tagPositions) {
-                if($tagPositions->getStart() >= $restoreItem->getPosition() and !$tagPositions->getIsAbsolute()) {
-                    $tagPositions->setStart($tagPositions->getStart() + $restoreItem->getLength() - $offRestore + $offSlice);
-                }
-            }
-
-            $modelWrapLeft = mb_substr($model, $restoreItem->getPosition() - 1, 1);
-
-            if($restoreItem->getPosition() and $restoreItem->getWrapCharLeft() != $modelWrapLeft and $offSlice >= 0) {
-                $model = $this->mb_substr_replace($model, $restoreItem->getWrapCharLeft(), $restoreItem->getPosition(), 0);
-
-                foreach($this->tagPositions as $tagPositions) {
-                    if($tagPositions->getStart() >= $restoreItem->getPosition() and !$tagPositions->getIsAbsolute()) {
-                        $tagPositions->setStart($tagPositions->getStart() + 1);
-                    }
-                }
-            }
-
-            $modelWrapRight = mb_substr($model, $restoreItem->getPosition() + $restoreItem->getLength(), 1);
-
-            if($restoreItem->getPosition() + $restoreItem->getLength() + 1 <= mb_strlen($model) and $restoreItem->getWrapCharRight() != $modelWrapRight and $offSlice >= 0) {
-                $model = $this->mb_substr_replace($model, $restoreItem->getWrapCharRight(), $restoreItem->getPosition() + $restoreItem->getLength(), 0);
-
-                foreach($this->tagPositions as $tagPositions) {
-                    if($tagPositions->getStart() >= $restoreItem->getPosition() + $restoreItem->getLength() and !$tagPositions->getIsAbsolute()) {
-                        $tagPositions->setStart($tagPositions->getStart() + 1);
-                    }
-                }
-            }
 
             $prevRestoreItem = $restoreItem;
         }
@@ -137,7 +104,7 @@ class InsertHighLightTags
         return $model;
     }
 
-    public function extractTags(string $highlight, string $tagName, int $absoluteOffset = 0) {
+    public function extractTags(string $highlight, string $tagName) {
         $tag = new Tag($tagName);
 
         $offset = 0;
@@ -151,7 +118,7 @@ class InsertHighLightTags
             $highlight = $this->str_replace_first($tag->getOpen(), '', $highlight);
             $highlight = $this->str_replace_first($tag->getClose(), '', $highlight);
 
-            $tagPosition[] = new TagPosition($tag, $start + $absoluteOffset, $len, boolval($absoluteOffset));
+            $tagPosition[] = new TagPosition($tag, $start, $len);
         }
 
         $this->tagPositions = array_merge($this->tagPositions, $tagPosition);
