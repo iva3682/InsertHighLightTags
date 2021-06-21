@@ -80,25 +80,21 @@ class InsertHighLightTags
             if ($a->getPosition() == $b->getPosition()) {
                 return 0;
             }
-
             return ($a->getPosition() < $b->getPosition()) ? -1 : 1;
         });
-
-        $prevRestoreItem = null;
 
         foreach($this->restoreItems as $restoreItem) {
             if(mb_strlen($model) < $restoreItem->getPosition()) {
                 $model = str_pad($model, $restoreItem->getPosition() + $restoreItem->getLength());
             }
 
-            $offSlice = $offRestore = 0;
-            if($prevRestoreItem and $prevRestoreItem->getPosition() + $prevRestoreItem->getLength() > $restoreItem->getPosition()) {
-                $offSlice = $restoreItem->getPosition() - ($prevRestoreItem->getPosition() + $prevRestoreItem->getLength());
+            $model = $this->mb_substr_replace($model, $restoreItem->getStringFill(), $restoreItem->getPosition(), 0);
+
+            foreach($this->tagPositions as $tagPositions) {
+                if($tagPositions->getStart() >= $restoreItem->getPosition()) {
+                    $tagPositions->setStart($tagPositions->getStart() + $restoreItem->getLength());
+                }
             }
-
-            $model = $this->mb_substr_replace($model, $restoreItem->getStringFill(), $restoreItem->getPosition(), $offRestore - $offSlice);
-
-            $prevRestoreItem = $restoreItem;
         }
 
         return $model;
