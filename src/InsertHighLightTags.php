@@ -76,12 +76,12 @@ class InsertHighLightTags
     }
 
     public function restore(string $source) {
-        $allow = ['', ' '];
+        $allowSpace = ['', ' '];
 
         foreach($this->restoreItems as $restoreItem) {
             foreach($this->tagPositions as $tagPositions) {
                 if($tagPositions->getStart() >= $restoreItem->getPosition()) {
-                    $offset = 0;
+                    $offsetSpace = $offsetPunct = 0;
                     $leftWrap = $rightWrap = '';
 
                     if($restoreItem->getPosition() - 1 >= 0) {
@@ -92,11 +92,15 @@ class InsertHighLightTags
                         $rightWrap = mb_substr($source, $restoreItem->getPosition() + $restoreItem->getLength(), 1);
                     }
 
-                    if(in_array($leftWrap, $allow) and in_array($rightWrap, $allow)) {
-                        $offset = 1;
+                    if(in_array($leftWrap, $allowSpace) and in_array($rightWrap, $allowSpace)) {
+                        $offsetSpace = 1;
                     }
 
-                    $tagPositions->setStart($tagPositions->getStart() + $restoreItem->getLength() + $offset);
+                    if(!in_array($leftWrap, $allowSpace) and !in_array($rightWrap, $allowSpace)) {
+                        $offsetPunct = 1;
+                    }
+
+                    $tagPositions->setStart($tagPositions->getStart() + $restoreItem->getLength() + $offsetSpace - $offsetPunct);
                 }
             }
         }
