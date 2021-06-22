@@ -75,29 +75,31 @@ class InsertHighLightTags
         return $source;
     }
 
-    public function restore(string $model): string {
-        usort($this->restoreItems, function (RestoreProductNameItem $a, RestoreProductNameItem $b) {
-            if ($a->getPosition() == $b->getPosition()) {
-                return 0;
-            }
-            return ($a->getPosition() < $b->getPosition()) ? -1 : 1;
-        });
+    public function restore(string $source) {
+        $allow = ['', ' '];
 
         foreach($this->restoreItems as $restoreItem) {
-            if(mb_strlen($model) < $restoreItem->getPosition()) {
-                $model = str_pad($model, $restoreItem->getPosition() + $restoreItem->getLength());
-            }
-
-            $model = $this->mb_substr_replace($model, $restoreItem->getStringFill(), $restoreItem->getPosition(), 0);
-
             foreach($this->tagPositions as $tagPositions) {
                 if($tagPositions->getStart() >= $restoreItem->getPosition()) {
-                    $tagPositions->setStart($tagPositions->getStart() + $restoreItem->getLength());
+                    $offset = 0;
+                    $leftWrap = $rightWrap = '';
+
+                    if($restoreItem->getPosition() - 1 >= 0) {
+                        $leftWrap = mb_substr($source, $restoreItem->getPosition() - 1, 1);
+                    }
+
+                    if($restoreItem->getPosition() + $restoreItem->getLength() <= mb_strlen($source)) {
+                        $rightWrap = mb_substr($source, $restoreItem->getPosition() + $restoreItem->getLength(), 1);
+                    }
+
+                    if(in_array($leftWrap, $allow) and in_array($rightWrap, $allow)) {
+                        $offset = 1;
+                    }
+
+                    $tagPositions->setStart($tagPositions->getStart() + $restoreItem->getLength() + $offset);
                 }
             }
         }
-
-        return $model;
     }
 
     public function extractTags(string $highlight, string $tagName) {
