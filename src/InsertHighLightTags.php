@@ -78,6 +78,13 @@ class InsertHighLightTags
     public function restore(string $source) {
         $allowSpace = ['', ' '];
 
+        usort($this->restoreItems, function (RestoreProductNameItem $a, RestoreProductNameItem $b) {
+            if ($a->getPosition() == $b->getPosition()) {
+                return 0;
+            }
+            return ($a->getPosition() < $b->getPosition()) ? -1 : 1;
+        });
+
         foreach($this->restoreItems as $restoreItem) {
             foreach($this->tagPositions as $tagPositions) {
                 if($tagPositions->getStart() >= $restoreItem->getPosition()) {
